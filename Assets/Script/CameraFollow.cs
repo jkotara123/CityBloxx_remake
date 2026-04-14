@@ -4,13 +4,15 @@ public class CameraFollow : MonoBehaviour
 {
     public GameController controller;
     public float lerpSpeed = 2f;
-    public Vector3 offset = new Vector3(0, 2, -10);
     
+    private float minY = 5f;
+    private float yOffset = 2f; 
+
     void LateUpdate()
     {
-        float targetY = controller.highestY + offset.y;
-        Vector3 targetPosition = new Vector3(0, targetY, offset.z);
-
+        float targetY = Mathf.Max(minY, controller.highestY + yOffset);
+        
+        Vector3 targetPosition = new Vector3(0, targetY, -10f);
         transform.position = Vector3.Lerp(transform.position, targetPosition, Time.deltaTime * lerpSpeed);
     }
 }

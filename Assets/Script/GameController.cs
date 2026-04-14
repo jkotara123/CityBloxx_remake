@@ -6,10 +6,10 @@ using TMPro;
 public class GameController : MonoBehaviour
 {
     public GameObject blockPrefab;
-    public float moveSpeed = 2f;
-    public float moveRange = 3f;
+    public float moveSpeed = 1.4f;
+    public float moveRange = 1f;
 
-    public float blockHeight = 1f; 
+    private float blockHeight = 1.5f; 
     
     private Rigidbody2D rb;
     private LineRenderer line;
@@ -17,7 +17,7 @@ public class GameController : MonoBehaviour
     private Block currentBlock = null;
     private Block newBlock = null;
     public List<Block> activeBlocks = new List<Block>();
-    public float highestY = 0f;
+    public float highestY = -0.27f;
     
     public bool isGameOver = false;
     public int lives = 3;
@@ -26,28 +26,29 @@ public class GameController : MonoBehaviour
 
     [Header("UI Settings")]
     public TextMeshProUGUI scoreText;
-    public TextMeshProUGUI livesText;
+    public GameObject heartPrefab;
+    public Transform heartsParent;
+    private List<GameObject> heartIcons = new List<GameObject>();
 
     void Start(){
+        InitializeHearts();
+
         rb = GetComponent<Rigidbody2D>();
         line = GetComponent<LineRenderer>();
         SpawnNewBlock();
     }
 
     void Update(){
-        if (isGameOver) return;
+        // if (isGameOver) return;
 
         UpdateHighestPoint();
-        UpdateStats();
+        UpdateScore();
         MoveHook();
 
         CheckForBlockDrop();
     }
 
     public void onSuccessfulLanding(){
-        currentBlock.isCurrent = false;
-        currentBlock = null;
-
         SpawnNewBlock();
     }
 
@@ -55,6 +56,8 @@ public class GameController : MonoBehaviour
         currentBlock.isCurrent = false;
         currentBlock = null;
         lives -= 1;
+
+        UpdateHeartUI();
 
         if (lives <= 0){
             GameOver();
@@ -64,6 +67,7 @@ public class GameController : MonoBehaviour
 
     void SpawnNewBlock(){
         if (isGameOver) return;
+        if (newBlock != null) return;
 
         Vector3 spawnPos = transform.position + Vector3.down * 2f;
         GameObject go = Instantiate(blockPrefab, spawnPos, Quaternion.identity);
@@ -79,15 +83,16 @@ public class GameController : MonoBehaviour
     }
     
     void Drop(){
-        newBlock.Release();
+        if (currentBlock) currentBlock.isCurrent = false;
 
+        newBlock.Release();
         currentBlock = newBlock;
         currentBlock.isCurrent = true;
         newBlock = null;
     }
 
     void UpdateHighestPoint(){
-        float currentMaxY = 0.3f;
+        float currentMaxY = -0.27f;
         for (int i = activeBlocks.Count - 1; i >= 0; i--)
         {
             if (activeBlocks[i] == null) {
@@ -95,8 +100,9 @@ public class GameController : MonoBehaviour
                 continue;
             }
 
-            if (activeBlocks[i].transform.position.y < -1f) 
+            if (activeBlocks[i].transform.position.y < -2f)
             {
+                Destroy(activeBlocks[i].gameObject);
                 activeBlocks.RemoveAt(i);
                 continue;
             }
@@ -107,22 +113,20 @@ public class GameController : MonoBehaviour
             }
         }
         highestY = currentMaxY;
+        Debug.Log("highestY: " + highestY);
     }
     
-    private void UpdateStats(){
+    private void UpdateScore(){
         score = (int)Math.Round(highestY / blockHeight);
 
         if (scoreText != null){
             scoreText.text = score.ToString();
         }
-        if (livesText != null){
-            livesText.text = "Lives: " + lives.ToString();
-        }
     }
 
     private void MoveHook(){
         float x = Mathf.Sin(Time.time * moveSpeed) * moveRange;
-        float targetHeight = highestY + 8f; 
+        float targetHeight = Camera.main.transform.position.y + 7f;
         transform.position = new Vector3(x, targetHeight, 0);
 
         if (newBlock != null){
@@ -148,7 +152,7 @@ public class GameController : MonoBehaviour
     }
 
     private System.Collections.IEnumerator StabilityRoutine(Block block){
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(1f);
 
         if (block == null) yield break;
 
@@ -168,5 +172,21 @@ public class GameController : MonoBehaviour
         if (block.transform.position.y < (highestY - 2.0f)) return false;
 
         return true;
+    }
+
+    void InitializeHearts() {
+        foreach (GameObject h in heartIcons) Destroy(h);
+        heartIcons.Clear();
+
+        for (int i = 0; i < lives; i++) {
+            GameObject heart = Instantiate(heartPrefab, heartsParent);
+            heartIcons.Add(heart);
+        }
+    }
+
+    public void UpdateHeartUI() {
+        for (int i = 0; i < heartIcons.Count; i++) {
+            heartIcons[i].SetActive(i < lives);
+        }
     }
 }

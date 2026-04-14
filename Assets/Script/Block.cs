@@ -38,6 +38,8 @@ public class Block : MonoBehaviour
             gameController.onMissedLanding();
             return;
         }
+
+        rb.mass = 20f;
         gameController.StartStabilityCheck(this);
     }
 }
