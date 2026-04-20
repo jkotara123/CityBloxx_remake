@@ -42,4 +42,16 @@ public class Block : MonoBehaviour
         rb.mass = 20f;
         gameController.StartStabilityCheck(this);
     }
+
+    public void SetupVisuals(BuildingType data, bool isRoof)
+{
+    SpriteRenderer sr = GetComponent<SpriteRenderer>();
+    
+    if (isRoof) {
+        sr.sprite = data.roofSprite;
+    }
+    else {
+        sr.sprite = data.blockSprite;
+    }
+}
 }

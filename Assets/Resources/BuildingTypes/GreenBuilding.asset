@@ -1,0 +1,18 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe75503ac347eeb46af64669a4968de5, type: 3}
+  m_Name: GreenBuilding
+  m_EditorClassIdentifier: Assembly-CSharp::BuildingType
+  buildingName: GreenBuilding
+  blockSprite: {fileID: -2399699543274225224, guid: 9993c8897915d98498f67cbeee923f06, type: 3}
+  roofSprite: {fileID: 5396823359995171650, guid: 1378db06cbe69174bb4373353d411283, type: 3}
+  totalBlocks: 20

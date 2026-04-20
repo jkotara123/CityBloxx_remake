@@ -5,9 +5,14 @@ using TMPro;
 
 public class GameController : MonoBehaviour
 {
+    [Header("Hook Settings")]
+    public float moveSpeed = 1.3f;
+    public float moveRange = 0.8f;
+    
+    [Header("Level Configuration")]
+    public BuildingType currentBuildingData;
+    public int blocksLeft;
     public GameObject blockPrefab;
-    public float moveSpeed = 1.4f;
-    public float moveRange = 1f;
 
     private float blockHeight = 1.5f; 
     
@@ -31,6 +36,8 @@ public class GameController : MonoBehaviour
     private List<GameObject> heartIcons = new List<GameObject>();
 
     void Start(){
+        if (currentBuildingData != null) blocksLeft = currentBuildingData.totalBlocks;
+        
         InitializeHearts();
 
         rb = GetComponent<Rigidbody2D>();
@@ -72,6 +79,9 @@ public class GameController : MonoBehaviour
         Vector3 spawnPos = transform.position + Vector3.down * 2f;
         GameObject go = Instantiate(blockPrefab, spawnPos, Quaternion.identity);
         newBlock = go.GetComponent<Block>();
+        
+        newBlock.SetupVisuals(currentBuildingData, blocksLeft == 1);
+
         newBlock.SetupBlock(rb, ++blockCount);
     }
 
@@ -89,6 +99,8 @@ public class GameController : MonoBehaviour
         currentBlock = newBlock;
         currentBlock.isCurrent = true;
         newBlock = null;
+
+        blocksLeft--;
     }
 
     void UpdateHighestPoint(){
