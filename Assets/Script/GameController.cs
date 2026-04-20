@@ -113,7 +113,6 @@ public class GameController : MonoBehaviour
             }
         }
         highestY = currentMaxY;
-        Debug.Log("highestY: " + highestY);
     }
     
     private void UpdateScore(){
