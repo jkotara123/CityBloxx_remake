@@ -36,6 +36,9 @@ public class GameController : MonoBehaviour
     private List<GameObject> heartIcons = new List<GameObject>();
 
     void Start(){
+        if (LevelManager.SelectedBuilding != null) {
+            currentBuildingData = LevelManager.SelectedBuilding;
+        }
         if (currentBuildingData != null) blocksLeft = currentBuildingData.totalBlocks;
         
         InitializeHearts();
@@ -56,6 +59,9 @@ public class GameController : MonoBehaviour
     }
 
     public void onSuccessfulLanding(){
+        if (blocksLeft <= 0){
+            GameOver();
+        }
         SpawnNewBlock();
     }
 
@@ -85,13 +91,43 @@ public class GameController : MonoBehaviour
         newBlock.SetupBlock(rb, ++blockCount);
     }
 
-    void GameOver()
-    {
+    void GameOver(){
+        if (isGameOver) return;
         isGameOver = true;
-        Debug.Log("Koniec gry! Wynik: " + score);
-        // Tutaj możesz aktywować Panel Game Over w UI
+
+        StartCoroutine(GameOverSequence());
     }
     
+    private System.Collections.IEnumerator GameOverSequence(){
+        heartsParent.gameObject.SetActive(false);
+
+        CameraFollow camFollow = Camera.main.GetComponent<CameraFollow>();
+        if (camFollow != null) {
+            camFollow.enabled = false;
+        }
+
+        Vector3 startPos = Camera.main.transform.position;
+        Vector3 endPos = new Vector3(0, 5f, -10f);
+        float duration = 2.0f;
+        float elapsed = 0;
+
+        while (elapsed < duration)
+        {
+            Camera.main.transform.position = Vector3.Lerp(startPos, endPos, elapsed / duration);
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+        Camera.main.transform.position = endPos;
+
+        // 3. Pokaż panel wyniku
+        // if (gameOverPanel != null) {
+        //     gameOverPanel.SetActive(true);
+        // }
+
+        // 4. Czekaj chwilę i wróć do menu
+        yield return new WaitForSeconds(3f);
+        UnityEngine.SceneManagement.SceneManager.LoadScene(0);
+    }
     void Drop(){
         if (currentBlock) currentBlock.isCurrent = false;
 

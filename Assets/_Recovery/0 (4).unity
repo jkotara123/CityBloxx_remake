@@ -716,7 +716,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameController
   moveSpeed: 1.3
   moveRange: 0.8
-  currentBuildingData: {fileID: 11400000, guid: ec2a68322c9b548488ff2b0b2ef532e2, type: 2}
+  currentBuildingData: {fileID: 11400000, guid: 583366fc7c407c344bcde865d002b583, type: 2}
   blocksLeft: 0
   blockPrefab: {fileID: 5970932964580725873, guid: 7f2193d7e04d0854cac36820b1feac0f, type: 3}
   activeBlocks: []
