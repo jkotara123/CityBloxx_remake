@@ -34,7 +34,7 @@ public class GameController : MonoBehaviour
     public GameObject heartPrefab;
     public Transform heartsParent;
     private List<GameObject> heartIcons = new List<GameObject>();
-
+    public GameObject gameOverPanel;
     void Start(){
         if (LevelManager.SelectedBuilding != null) {
             currentBuildingData = LevelManager.SelectedBuilding;
@@ -120,9 +120,30 @@ public class GameController : MonoBehaviour
         Camera.main.transform.position = endPos;
 
         // 3. Pokaż panel wyniku
-        // if (gameOverPanel != null) {
-        //     gameOverPanel.SetActive(true);
-        // }
+        if (gameOverPanel != null) {
+            
+            // Przypisujemy do panelu
+            scoreText.transform.SetParent(gameOverPanel.transform);
+            
+            // Resetujemy skalę (często po zmianie parenta skala się psuje)
+            scoreText.transform.localScale = Vector3.one;
+
+            RectTransform rt = scoreText.GetComponent<RectTransform>();
+            
+            // Ustawiamy kotwice na środek
+            rt.anchorMin = new Vector2(0.5f, 0.5f);
+            rt.anchorMax = new Vector2(0.5f, 0.5f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
+            
+            // Zerujemy pozycję względem środka panelu
+            rt.anchoredPosition = Vector2.zero; 
+            
+            scoreText.fontSize = 100;
+            scoreText.alignment = TextAlignmentOptions.Center; // Wyśrodkowanie tekstu
+            scoreText.text = "FINAL SCORE: " + score;
+
+            gameOverPanel.SetActive(true);
+        }
 
         // 4. Czekaj chwilę i wróć do menu
         yield return new WaitForSeconds(3f);

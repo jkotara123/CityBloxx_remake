@@ -15,4 +15,4 @@ MonoBehaviour:
   buildingName: GreenBuilding
   blockSprite: {fileID: -2399699543274225224, guid: 9993c8897915d98498f67cbeee923f06, type: 3}
   roofSprite: {fileID: 5396823359995171650, guid: 1378db06cbe69174bb4373353d411283, type: 3}
-  totalBlocks: 20
+  totalBlocks: 15

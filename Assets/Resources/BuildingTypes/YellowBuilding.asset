@@ -15,4 +15,4 @@ MonoBehaviour:
   buildingName: YellowBuilding
   blockSprite: {fileID: -3386545547340684358, guid: 07c8c196614a89749adeb86f5b7ed2bf, type: 3}
   roofSprite: {fileID: -2079030214573355829, guid: f2d3d336f317fb2459b3d258dfa1c16c, type: 3}
-  totalBlocks: 30
+  totalBlocks: 20
