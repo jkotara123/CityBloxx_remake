@@ -16,3 +16,4 @@ MonoBehaviour:
   blockSprite: {fileID: -5346708522279743761, guid: ed156da3ffd3bb4488e1f1d6509265df, type: 3}
   roofSprite: {fileID: 5011516436803827845, guid: fe6b3fedef7a2c043a51405d47808972, type: 3}
   totalBlocks: 5
+  color: 1

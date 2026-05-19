@@ -93,7 +93,18 @@ public class GameController : MonoBehaviour
 
     void GameOver(){
         if (isGameOver) return;
+
+        UpdateScore();
+        
         isGameOver = true;
+
+        LevelManager.LastBuilding = new PlacedBuilding
+        {
+            color = LevelManager.SelectedBuilding.color,
+            score = score,
+            hasRoof = blocksLeft <= 0
+        };
+
 
         StartCoroutine(GameOverSequence());
     }

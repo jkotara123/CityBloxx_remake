@@ -9,10 +9,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe75503ac347eeb46af64669a4968de5, type: 3}
+  m_Script: {fileID: 11500000, guid: 9cb79372ed6061e4c8ada0d8b8a3c57c, type: 3}
   m_Name: RedBuilding
   m_EditorClassIdentifier: Assembly-CSharp::BuildingType
   buildingName: RedBuilding
   blockSprite: {fileID: -1565828462937117185, guid: 9f4790fb9914d3f40be194ecf0f105ae, type: 3}
   roofSprite: {fileID: -6454287763305394610, guid: bec114151b98d15468df72ba0c72fd7a, type: 3}
   totalBlocks: 10
+  color: 0
