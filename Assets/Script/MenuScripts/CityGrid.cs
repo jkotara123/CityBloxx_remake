@@ -38,13 +38,27 @@ public class CityGrid : MonoBehaviour
     
     private GameObject[,] visuals = new GameObject[5,5];
 
+    public GameObject cancelButton;
+    public GameObject[] createButtons;
+
+    [Header("UI Statistics")]
+    public TMPro.TextMeshProUGUI currentTileScoreText;
+    public TMPro.TextMeshProUGUI totalCityScoreText;
+
+    public TMPro.TextMeshProUGUI newBuildingScoreText;
+    public UnityEngine.UI.Image newBuildingPreviewImage;
+
+
     void Start()
     {
+        CityManager.LoadGame();
         GenerateGrid();
 
         cursorInstance = Instantiate(cursorPrefab);
 
         UpdateCursor();
+        
+        UpdateCancelButtonVisibility();
 
         RefreshVisuals();
 
@@ -55,6 +69,8 @@ public class CityGrid : MonoBehaviour
     }
 
     void Update(){
+        // UpdateCancelButtonVisibility();
+        
         if (Input.GetKeyDown(KeyCode.Return)){
             PlaceBuilding();
         }
@@ -114,16 +130,78 @@ public class CityGrid : MonoBehaviour
             ) + transform.position;
     }
 
-    void PlaceBuilding(){
+    void PlaceBuilding()    {
         if (LevelManager.LastBuilding == null)
             return;
 
+        if (!CanPlaceBuilding(currentX, currentY, LevelManager.LastBuilding.color))
+        {
+            return;
+        }
+
         CityManager.grid[currentX, currentY] = LevelManager.LastBuilding;
-
         LevelManager.LastBuilding = null;
-
+        
         RefreshVisuals();
         CityManager.Print();
+        
+        CityManager.SaveGame();
+    }
+
+    private bool CanPlaceBuilding(int targetX, int targetY, BuildingColor color)
+    {
+        // Niebieski budynek można postawić zawsze
+        if (color == BuildingColor.Blue) 
+            return true;
+
+        bool hasBlueNeighbor = false;
+        bool hasRedNeighbor = false;
+        bool hasGreenNeighbor = false;
+
+        // Tablice przesunięć dla 4 sąsiadów: prawo, lewo, góra, dół
+        int[] dx = { 1, -1, 0, 0 };
+        int[] dy = { 0, 0, 1, -1 };
+
+        // Sprawdzamy wszystkich 4 sąsiadów wokół pozycji docelowej
+        for (int i = 0; i < 4; i++)
+        {
+            int neighborX = targetX + dx[i];
+            int neighborY = targetY + dy[i];
+
+            // Upewniamy się, że sąsiad mieści się w granicach gridu
+            if (neighborX >= 0 && neighborX < width && neighborY >= 0 && neighborY < height)
+            {
+                PlacedBuilding neighbor = CityManager.grid[neighborX, neighborY];
+                if (neighbor != null)
+                {
+                    if (neighbor.color == BuildingColor.Blue) hasBlueNeighbor = true;
+                    if (neighbor.color == BuildingColor.Red) hasRedNeighbor = true;
+                    if (neighbor.color == BuildingColor.Green) hasGreenNeighbor = true;
+                }
+            }
+        }
+
+        // Warunki logiczne dla poszczególnych kolorów:
+        switch (color)
+        {
+            case BuildingColor.Red:
+                // Musi sąsiadować z niebieskim
+                return hasBlueNeighbor;
+
+            case BuildingColor.Green:
+                // Musi sąsiadować z niebieskim ORAZ czerwonym
+                return hasBlueNeighbor && hasRedNeighbor;
+
+            case BuildingColor.Yellow:
+                // Musi sąsiadować z niebieskim, czerwonym ORAZ zielonym
+                return hasBlueNeighbor && hasRedNeighbor && hasGreenNeighbor;
+
+            default:
+                return false;
+        }
+    }
+    public void DestroyBuilding(){
+        LevelManager.LastBuilding = null;
     }
 
     void SetEmptyVisual(int x, int y){
@@ -167,6 +245,67 @@ public class CityGrid : MonoBehaviour
             {
                 SetBuildingVisual(x, y, CityManager.grid[x, y]);
             }
+        }
+    }
+
+    public void UpdateStatisticsUI()
+    {
+        int totalScore = 0;
+        for (int x = 0; x < width; x++){
+            for (int y = 0; y < height; y++)
+            {
+                if (CityManager.grid[x, y] != null)
+                {
+                    totalScore += CityManager.grid[x, y].score;
+                }
+            }
+        }
+
+        if (totalCityScoreText != null) 
+            totalCityScoreText.text = $"{totalScore}";
+
+        PlacedBuilding buildingOnTile = CityManager.grid[currentX, currentY];
+        if (currentTileScoreText != null){
+            if (buildingOnTile != null)
+                currentTileScoreText.text = $"{buildingOnTile.score}";
+            else
+                currentTileScoreText.text = "0 (Empty)";
+        }
+
+        bool hasNewBuilding = (LevelManager.LastBuilding != null);
+
+        foreach (GameObject button in createButtons){
+            if (button != null){
+                button.SetActive(!hasNewBuilding);
+            }
+        }
+
+        cancelButton.SetActive(hasNewBuilding);
+
+        if (hasNewBuilding)
+        {
+            if (newBuildingScoreText != null)
+                newBuildingScoreText.text = $"New Score: {LevelManager.LastBuilding.score}";
+
+            if (newBuildingPreviewImage != null)
+            {   
+                // Tutaj dopasowujemy sprite obrazka do parametrów nowego budynku
+                newBuildingPreviewImage.sprite = GetSpriteForBuilding(LevelManager.LastBuilding);
+            }
+        }
+
+    }
+
+    private Sprite GetSpriteForBuilding(PlacedBuilding b){
+        if (b == null) return sprites.empty;
+
+        switch (b.color)
+        {
+            case BuildingColor.Red: return b.hasRoof ? sprites.redRoof : sprites.redNoRoof;
+            case BuildingColor.Blue: return b.hasRoof ? sprites.blueRoof : sprites.blueNoRoof;
+            case BuildingColor.Green: return b.hasRoof ? sprites.greenRoof : sprites.greenNoRoof;
+            case BuildingColor.Yellow: return b.hasRoof ? sprites.yellowRoof : sprites.yellowNoRoof;
+            default: return sprites.empty;
         }
     }
 }
