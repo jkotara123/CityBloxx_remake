@@ -93,7 +93,7 @@ public class GameController : MonoBehaviour
 
     void GameOver(){
         if (isGameOver) return;
-
+        UpdateHighestPoint();   
         UpdateScore();
         
         isGameOver = true;

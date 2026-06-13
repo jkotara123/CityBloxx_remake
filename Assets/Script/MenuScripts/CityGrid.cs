@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.SceneManagement;
 
 [System.Serializable]
 public class BuildingSprites
@@ -45,9 +45,9 @@ public class CityGrid : MonoBehaviour
     public TMPro.TextMeshProUGUI currentTileScoreText;
     public TMPro.TextMeshProUGUI totalCityScoreText;
 
-    public TMPro.TextMeshProUGUI newBuildingScoreText;
+    public TMPro.TextMeshProUGUI newBuildingScore;
     public UnityEngine.UI.Image newBuildingPreviewImage;
-
+    public TMPro.TextMeshProUGUI newBuildingScoreText;
 
     void Start()
     {
@@ -58,7 +58,6 @@ public class CityGrid : MonoBehaviour
 
         UpdateCursor();
         
-        UpdateCancelButtonVisibility();
 
         RefreshVisuals();
 
@@ -116,6 +115,7 @@ public class CityGrid : MonoBehaviour
             currentY = Mathf.Max(currentY - 1, 0);
 
         UpdateCursor();
+        UpdateStatisticsUI();
     }
 
     void UpdateCursor(){
@@ -202,6 +202,7 @@ public class CityGrid : MonoBehaviour
     }
     public void DestroyBuilding(){
         LevelManager.LastBuilding = null;
+        UpdateStatisticsUI();
     }
 
     void SetEmptyVisual(int x, int y){
@@ -246,12 +247,15 @@ public class CityGrid : MonoBehaviour
                 SetBuildingVisual(x, y, CityManager.grid[x, y]);
             }
         }
+
+        UpdateStatisticsUI();
     }
 
-    public void UpdateStatisticsUI()
-    {
+    public void UpdateStatisticsUI(){
+        // === 1. AKTUALIZACJA STANU MIASTA (Zawsze aktywne) ===
         int totalScore = 0;
-        for (int x = 0; x < width; x++){
+        for (int x = 0; x < width; x++)
+        {
             for (int y = 0; y < height; y++)
             {
                 if (CityManager.grid[x, y] != null)
@@ -264,36 +268,60 @@ public class CityGrid : MonoBehaviour
         if (totalCityScoreText != null) 
             totalCityScoreText.text = $"{totalScore}";
 
+        // === 2. AKTUALIZACJA CURRENT TILE (Zawsze aktywne) ===
         PlacedBuilding buildingOnTile = CityManager.grid[currentX, currentY];
-        if (currentTileScoreText != null){
+        if (currentTileScoreText != null)
+        {
             if (buildingOnTile != null)
                 currentTileScoreText.text = $"{buildingOnTile.score}";
             else
-                currentTileScoreText.text = "0 (Empty)";
+                currentTileScoreText.text = "0";
         }
 
+        // === 3. ZARZĄDZANIE WIDOCZNOŚCIĄ I LOGIKĄ NA PODSTAWIE LASTBUILDING ===
         bool hasNewBuilding = (LevelManager.LastBuilding != null);
 
-        foreach (GameObject button in createButtons){
-            if (button != null){
+        // Przełączanie przycisków kreacji (aktywne tylko gdy brak nowego budynku)
+        foreach (GameObject button in createButtons)
+        {
+            if (button != null)
+            {
                 button.SetActive(!hasNewBuilding);
             }
         }
 
-        cancelButton.SetActive(hasNewBuilding);
+        // Przełączanie przycisku kasowania (aktywne gdy jest nowy budynek)
+        if (cancelButton != null)
+        {
+            cancelButton.SetActive(hasNewBuilding);
+        }
 
+        // Przełączanie widoczności statystyk nowego budynku
+        if (newBuildingScore != null)
+        {
+            newBuildingScore.gameObject.SetActive(hasNewBuilding);
+        }
+
+        if (newBuildingScoreText != null){
+            newBuildingScoreText.gameObject.SetActive(hasNewBuilding);
+        }
+        
+        if (newBuildingPreviewImage != null)
+        {
+            newBuildingPreviewImage.gameObject.SetActive(hasNewBuilding);
+        }
+
+        // Aktualizacja danych nowego budynku, jeśli istnieje
         if (hasNewBuilding)
         {
-            if (newBuildingScoreText != null)
-                newBuildingScoreText.text = $"New Score: {LevelManager.LastBuilding.score}";
+            if (newBuildingScore != null)
+                newBuildingScore.text = $"{LevelManager.LastBuilding.score}";
 
             if (newBuildingPreviewImage != null)
             {   
-                // Tutaj dopasowujemy sprite obrazka do parametrów nowego budynku
                 newBuildingPreviewImage.sprite = GetSpriteForBuilding(LevelManager.LastBuilding);
             }
         }
-
     }
 
     private Sprite GetSpriteForBuilding(PlacedBuilding b){
@@ -307,5 +335,24 @@ public class CityGrid : MonoBehaviour
             case BuildingColor.Yellow: return b.hasRoof ? sprites.yellowRoof : sprites.yellowNoRoof;
             default: return sprites.empty;
         }
+    }
+
+    public void NewGame(){
+        // 1. Usuwamy zapis z pamięci urządzenia
+        if (PlayerPrefs.HasKey("CityBloxxSave"))
+        {
+            PlayerPrefs.DeleteKey("CityBloxxSave");
+        }
+
+        // 2. Czyścimy tablicę w pamięci RAM
+        CityManager.grid = new PlacedBuilding[5, 5];
+        if (LevelManager.LastBuilding != null) 
+            LevelManager.LastBuilding = null;
+
+        // 3. Przeładowujemy aktualną scenę, aby zresetować grid i UI
+        Scene currentScene = SceneManager.GetActiveScene();
+        SceneManager.LoadScene(currentScene.name);
+        
+        Debug.Log("Rozpoczęto nową grę. Stary zapis został usunięty.");
     }
 }
