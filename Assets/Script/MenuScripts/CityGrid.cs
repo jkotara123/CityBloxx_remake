@@ -355,4 +355,16 @@ public class CityGrid : MonoBehaviour
         
         Debug.Log("Rozpoczęto nową grę. Stary zapis został usunięty.");
     }
+
+    public void QuitGame(){
+        #if UNITY_EDITOR
+            // Jeśli testujesz grę w edytorze Unity, to polecenie wyłączy tryb Play
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            // Jeśli grasz w zbuildowaną grę (.exe), to polecenie zamknie program
+            Application.Quit();
+        #endif
+        
+        Debug.Log("Wyjście z gry zostało wywołane.");
+    }
 }

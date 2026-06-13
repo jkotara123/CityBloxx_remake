@@ -38,6 +38,7 @@ public class GameController : MonoBehaviour
     void Start(){
         if (LevelManager.SelectedBuilding != null) {
             currentBuildingData = LevelManager.SelectedBuilding;
+            Debug.Log(LevelManager.SelectedBuilding);
         }
         if (currentBuildingData != null) blocksLeft = currentBuildingData.totalBlocks;
         
